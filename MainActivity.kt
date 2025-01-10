@@ -1,86 +1,78 @@
-package com.example.mootrakiapp
+package com.example.myapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.mootrakiapp.ui.theme.MootrakiAppTheme
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.myapp.ui.theme.MyAppTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.navigation.NavController
-
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
-            MootrakiAppTheme {
-                val navigationController = rememberNavController()
-                Scaffold(bottomBar = {NavigationBar(navigationController)}) { innerPadding ->
-                    NavHost(
-                        navController = navigationController,
-                        startDestination = Screen.Home.route,
-                        Modifier.padding(innerPadding)
-                    ) { //the pages displayed in the navigation bar
-                        composable(Screen.Home.route) { Home() }
-                        composable(Screen.Calendar.route) { Calendar() }
-                        composable(Screen.Charts.route) { Charts() }
-                        composable(Screen.Affirmations.route) { Affirmations() }
-                    }
+            //DropdownMenuMood()
+            MaterialTheme {
+                Surface (color = MaterialTheme.colorScheme.background) {
+                    // Use a Column to stack the charts vertically
+//                    Column(
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(16.dp), // Add padding around the column
+//                        verticalArrangement = Arrangement.spacedBy(16.dp) // Space between charts
+//                    ) {
+                        //BarChart(data = listOf(10f, 20f, 15f, 30f, 25f)) // BarChart composable call
+                        DropdownMenuMood()
+                        DropdownMenuEmotions()
+                        //LineChart(data = listOf(10f, 20f, 15f, 30f, 25f)) // LineChart composable call
+                    //}
                 }
             }
         }
     }
 }
 
-
+//@Composable
+//fun MainScreen() {
+//    val data = listOf(10f, 20f, 30f, 25f, 15f)
+//    val maxValue = data.maxOrNull() ?: 1f // Get the maximum value for scaling
+//
+//    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//        BarChart2(data = data, maxValue = maxValue)
+//    }
+//}
+//class MainActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        setContent {
+//            DropdownMenuExample()
+//        }
+//    }
+//}
 @Composable
-fun NavigationBar(navigationController: NavController){
-    val features = listOf(
-        Screen.Home,
-        Screen.Calendar,
-        Screen.Charts,
-        Screen.Affirmations
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
     )
-
-    BottomNavigation (backgroundColor = colorResource(id = R.color.green)){
-        features.forEach { screen ->
-            BottomNavigationItem(
-                icon = {
-                    when (screen) {
-                        is Screen.Home -> Icon(painterResource(id = R.drawable.ic_home), contentDescription = "Home")
-                        is Screen.Calendar -> Icon(painterResource(id = R.drawable.ic_calendar), contentDescription = "Calendar")
-                        is Screen.Charts -> Icon(painterResource(id = R.drawable.ic_charts), contentDescription = "Charts")
-                        is Screen.Affirmations -> Icon(painterResource(id = R.drawable.ic_affirmations), contentDescription = "Affirmations")
-                    }
-                },
-                label = {Text(screen.route.capitalize())},
-                selected = false, // You will need to manage the selected state
-                // Change the selected state to true to manage it better
-                onClick = {
-                    navigationController.navigate(screen.route) {
-                        // Clear the back stack to prevent navigating back to previous screens
-                        popUpTo(Screen.Home.route){saveState = true}
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                selectedContentColor = colorResource(id = R.color.white), // Use selected color
-                unselectedContentColor = colorResource(id = R.color.white) // Use unselected color
-            )
-        }
-    }
 }
 
-
-
-
-
-
-
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    MyAppTheme {
+        Greeting("Android")
+    }
+}
