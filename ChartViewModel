@@ -1,0 +1,52 @@
+package com.example.mootraki
+
+class ChartViewModel(private val entriesRepository: EntriesRepository) : ViewModel() {
+
+    private val _allEntries = MutableStateFlow<List<Entry>>(emptyList())
+    val allEntries: StateFlow<List<Entry>> get() = _allEntries.asStateFlow()
+
+    init {
+        fetchAllEntries()
+    }
+
+    fun fetchAllEntries() {
+        viewModelScope.launch {
+            entriesRepository.getAllEntriesStream().collect { entries ->
+                _allEntries.value = entries
+            }
+        }
+    }
+
+    // Count moods for days 10-16 of January 2025 in order to have data when showing example
+    fun countMoodsForLastWeek(): Map<Int, Int> {
+        val entries = _allEntries.value
+        return entries.filter { entry ->
+            // Check if the entry date is between January 10 and January 16, 2025
+            val date = LocalDate.parse(entry.date) // Assuming date is in "yyyy-MM-dd" format
+            date.year == 2025 && date.monthValue == 1 && date.dayOfMonth in 10..16
+        }.groupingBy { it.mood }.eachCount() // Count occurrences of each mood
+    }
+
+    // Count occurrences of a specified mood for each month in 2024 in order to have data when showing example
+    fun countMoodForEachMonth(mood: Int): Map<Int, Int> {
+        val entries = _allEntries.value
+        return entries.filter { entry ->
+            // Check if the entry date is in the year 2024
+            val date = LocalDate.parse(entry.date)
+            date.year == 2024
+        }.filter { it.mood == mood } // Filter to keep only the specified mood
+            .groupingBy { LocalDate.parse(it.date).monthValue } // Group by month
+            .eachCount() // Count occurrences for each month
+    }
+
+    // Count occurrences of a specified emotion for each month in 2024 in order to have data when showing example
+    fun countEmotionForEachMonth(emotion: String): Map<Int, Int> {
+        val entries = _allEntries.value
+        return entries.filter { entry ->
+            // Check if the entry date is in the year 2024
+            val date = LocalDate.parse(entry.date)
+            date.year == 2024 && entry.emotions == emotion // Filter by the specified emotion
+        }.groupingBy { LocalDate.parse(it.date).monthValue } // Group by month
+            .eachCount() // Count occurrences for each month
+    }
+}
