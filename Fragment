@@ -1,0 +1,58 @@
+package com.example.mootraki
+
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+class MyFragment : Fragment() {
+    private lateinit var viewModel: ChartViewModel
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_my, container, false)
+    }
+
+//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+//        super.onViewCreated(view, savedInstanceState)
+//
+//        viewModel = ViewModelProvider(this).get(ChartViewModel::class.java)
+//
+//        // Observe allEntries to perform counting when data is available
+//        viewModel.allEntries.onEach { entries ->
+//            // Perform counting functions
+//            val moodCounts = viewModel.countMoodsForLastWeek()
+//            val selectedMoodCounts = viewModel.countMoodForEachMonth(mood=2)
+//            val selectedEmotionsCounts = viewModel.countEmotionForEachMonth(emotion="Stressed")
+//
+//            // Update the graph with the counts
+//            updateGraph(moodCounts, selectedMoodCounts, selectedEmotionsCounts)
+//        }.launchIn(viewLifecycleOwner.lifecycleScope)
+//    }
+
+    @Composable
+    private fun MakeFloats(
+        moodCounts: Map<Int, Int>,
+        selectedMoodCounts: Map<Int, Int>,
+        selectedEmotionsCounts: Map<Int, Int>
+    ) : Triple<List<Float>, List<Float>, List<Float>> {
+        // Convert mood counts to List<Float>
+        val moodCountEntries = moodCounts.values.map { it.toFloat() }
+
+        // Convert selected mood counts to List<Float>
+        val selectedMoodCountEntries = selectedMoodCounts.values.map { it.toFloat() }
+
+        // Convert selected emotions counts to List<Float>
+        val selectedEmotionsCountEntries = selectedEmotionsCounts.values.map { it.toFloat() }
+
+        // Return the three lists as a Triple
+        return Triple(moodCountEntries, selectedMoodCountEntries, selectedEmotionsCountEntries)
+
+//        // Now calls Charts with the prepared data
+//        PieChart(emotionsCount = moodCountEntries) // For mood counts
+//        HorizontalBarChart(selectedMoodCountEntries) // For selected mood counts
+//        LineChart(selectedEmotionsCountEntries) // For selected emotions counts
+    }
+}
