@@ -1,0 +1,57 @@
+fun countMoodForEachMonth(mood: Int): Map<Int, Int> {
+    val entries = _allEntries.value
+    val moodCount = mutableMapOf<Int, Int>()
+
+    // Iterate through each entry
+    entries.forEach { entry ->
+        try {
+            // Parse the date from the entry
+            val date = LocalDate.parse(entry.date) // Assuming date is in "yyyy-MM-dd" format
+            
+            // Check if the date is in the year 2024
+            if (date.year == 2024 && entry.mood == mood) {
+                // Get the month value (1 for January, 2 for February, etc.)
+                val month = date.monthValue
+                
+                // Count the occurrences for the specified mood
+                moodCount[month] = moodCount.getOrDefault(month, 0) + 1
+            }
+        } catch (e: Exception) {
+            // Handle parsing error if necessary
+            e.printStackTrace()
+        }
+    }
+    return moodCount
+}
+
+
+
+
+fun countEmotionForEachMonth(emotion: String): Map<Int, Int> {
+    val entries = _allEntries.value
+    val emotionCount = mutableMapOf<Int, Int>()
+
+    // Iterate through each entry
+    entries.forEach { entry ->
+        try {
+            // Parse the date from the entry
+            val date = LocalDate.parse(entry.date) // Assuming date is in "yyyy-MM-dd" format
+            
+            // Check if the date is in the year 2024
+            if (date.year == 2024) {
+                // Check if the specified emotion is present in the emotions string
+                if (entry.emotions.split(",").map { it.trim() }.contains(emotion)) {
+                    // Get the month value (1 for January, 2 for February, etc.)
+                    val month = date.monthValue
+                    
+                    // Count the occurrences for the specified emotion
+                    emotionCount[month] = emotionCount.getOrDefault(month, 0) + 1
+                }
+            }
+        } catch (e: Exception) {
+            // Handle parsing error if necessary
+            e.printStackTrace()
+        }
+    }
+    return emotionCount
+}
