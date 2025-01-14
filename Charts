@@ -1,4 +1,4 @@
-package com.example.myapp
+package com.example.mootraki
 
 // Charts.kt
 import androidx.compose.foundation.layout.*
@@ -21,70 +21,117 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 
-//call this from mainActivity with
-// class MainActivity : ComponentActivity() {
+//και μετά μέσα στο activity πρέπει να γίνουν αυτά
+// import android.os.Bundle
+//import androidx.activity.ComponentActivity
+//import androidx.activity.compose.setContent
+//import androidx.compose.material.Text
+//import androidx.compose.runtime.collectAsState
+//import androidx.compose.runtime.remember
+//import androidx.lifecycle.ViewModelProvider
+//import kotlinx.coroutines.flow.collect
+//import kotlinx.coroutines.launch
+//
+//πως να κληθεί από το main activity 
+//class MainActivity : ComponentActivity() {
 //    private lateinit var viewModel: ChartViewModel //AYTO
+//
 //    override fun onCreate(savedInstanceState: Bundle?) {
 //        super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
 //
-//        // Initialize the ViewModel
+//        // Initialize ViewModel
 //        viewModel = ViewModelProvider(this).get(ChartViewModel::class.java) //AYTO
 //
+//        // Set the content to a Composable function
 //        setContent {
-//            MyappTheme {
-//                // Call the Charts Composable and pass the ViewModel
-//                Charts(viewModel = viewModel) //AYTO
-//            }
+//            // Call your Composable function here
+//            Charts(viewModel) //AYTO OΛΟ
 //        }
+//    }
+//}
+//
+
 @Composable
-fun Charts(viewModel: ChartViewModel) {
-    // Get the selected mood and emotion from dropdowns
-    val selectedMood = dropDownMoods() // Assuming this returns an Int
-    val selectedEmotion = dropDownEmotions() // Assuming this returns a String
+fun Charts(viewModel: ChartViewModel) { 
+// Get the selected mood and emotion from dropdowns
+val selectedMood = dropDownMoods() // Assuming this returns an Int
+val selectedEmotion = dropDownEmotions() // Assuming this returns a String
 
-    // Count moods and emotions based on the selected values
-    val selectedMoodCounts = viewModel.countMoodForEachMonth(mood = selectedMood)
-    val selectedEmotionsCounts = viewModel.countEmotionForEachMonth(emotion = selectedEmotion)
+    // Collect the entries from the ViewModel
+    val entries = viewModel.allEntries.collectAsState(initial = emptyList()).value
 
-    // Prepare data for the charts
-    val (moodCountEntries, selectedMoodCountEntries, selectedEmotionsCountEntries) = MakeFloats(
-        viewModel.countMoodsForLastWeek(), // Assuming this is for the pie chart
-        selectedMoodCounts,
-        selectedEmotionsCounts
-    )
+    // Perform counting functions
+    val moodCounts = remember { viewModel.countMoodsForLastWeek() }
+    val selectedMoodCounts = remember { viewModel.countMoodForEachMonth(mood = selectedMood) }
+    val selectedEmotionsCounts = remember { viewModel.countEmotionForEachMonth(emotion = selectedEmotion) }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-            // Pie Chart
-            Text(
-                text = "Your Mood in the last seven days (PieChart)",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            PieChart(
-                emotionsCount = moodCountEntries, // Use the prepared data
-                modifier = Modifier.size(200.dp) // Ensure the size is set for the preview
-            )
+// Prepare data for the charts
+val (moodCountEntries, selectedMoodCountEntries, selectedEmotionsCountEntries) = MakeFloats(
+    viewModel.countMoodsForLastWeek(), // Assuming this is for the pie chart, γιατί εδω δεν βάζει τη μεταβλητή??
+    selectedMoodCounts,
+    selectedEmotionsCounts
+)
+Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        // Pie Chart
+        Text(
+            text = "Your Mood in the last seven days (PieChart)",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        PieChart(
+            emotionsCount = moodCountEntries, // Use the prepared data
+            modifier = Modifier.size(200.dp) // Ensure the size is set for the preview
+        )
 
-            // Line Chart
-            Text(
-                text = "Review your year 2024: Line Chart: Shows the distribution of emotion: $selectedEmotion",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            LineChart(
-                emotionsData = selectedEmotionsCountEntries // Use the prepared data
-            )
+        // Line Chart
+        Text(
+            text = "Review your year 2024: Line Chart: Shows the distribution of emotion: $selectedEmotion",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        LineChart(
+            emotionsData = selectedEmotionsCountEntries // Use the prepared data
+        )
 
-            // Bar Chart (ισως χρειαστεί να μπει καπου το scrollable)
-            Text(
-                text = "Review your Year 2024: Bar Chart: Represents the distribution of $selectedMood mood for each month.",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            HorizontalBarChart(
-                moods = selectedMoodCountEntries // Use the prepared data
-            )
-        }
+        // Bar Chart (ισως χρειαστεί να μπει καπου το scrollable)
+        Text(
+            text = "Review your Year 2024: Bar Chart: Represents the distribution of $selectedMood mood for each month.",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        HorizontalBarChart(
+            moods = selectedMoodCountEntries // Use the prepared data
+        )
     }
+}
+} // ειναι πολύ πιθανό να λέιπουν ή να είναι παραπάνω {}
+//
+//    // Display the results
+//    Text("Mood Counts for Last Week: $moodCounts")
+//    Text("Selected Mood Counts for Each Month: $selectedMoodCounts")
+//    Text("Selected Emotions Counts for Each Month: $selectedEmotionsCounts")
+//}
+
+@Composable
+private fun MakeFloats(
+    moodCounts: Map<Int, Int>,
+    selectedMoodCounts: Map<Int, Int>,
+    selectedEmotionsCounts: Map<Int, Int>
+) : Triple<List<Float>, List<Float>, List<Float>> {
+    // Convert mood counts to List<Float>
+    val moodCountEntries = moodCounts.values.map { it.toFloat() }
+
+    // Convert selected mood counts to List<Float>
+    val selectedMoodCountEntries = selectedMoodCounts.values.map { it.toFloat() }
+
+    // Convert selected emotions counts to List<Float>
+    val selectedEmotionsCountEntries = selectedEmotionsCounts.values.map { it.toFloat() }
+
+    // Return the three lists as a Triple
+    return Triple(moodCountEntries, selectedMoodCountEntries, selectedEmotionsCountEntries)
+
+//        // Now calls Charts with the prepared data
+//        PieChart(emotionsCount = moodCountEntries) // For mood counts
+//        HorizontalBarChart(selectedMoodCountEntries) // For selected mood counts
+//        LineChart(selectedEmotionsCountEntries) // For selected emotions counts
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,7 +172,7 @@ fun dropDownEmotions() : String {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable
+@Composable //DropDownMenu
 fun dropDownMoods() : Int {
     val dropDownOpen = remember { mutableStateOf(false) }
     val selectedMood = remember { mutableStateOf("Select a Mood") }
@@ -172,9 +219,3 @@ fun dropDownMoods() : Int {
     }
     return moodvalue
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewCharts() {
-    //Charts()
-//}
