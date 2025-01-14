@@ -1,7 +1,9 @@
 package com.example.mootraki
 
-class ChartViewModel(private val entriesRepository: EntriesRepository) : ViewModel() {
+import java.time.LocalDate
+//λείπουν imports
 
+class ChartViewModel(private val entriesRepository: EntriesRepository) : ViewModel() {
     private val _allEntries = MutableStateFlow<List<Entry>>(emptyList())
     val allEntries: StateFlow<List<Entry>> get() = _allEntries.asStateFlow()
 
@@ -16,37 +18,89 @@ class ChartViewModel(private val entriesRepository: EntriesRepository) : ViewMod
             }
         }
     }
-
     // Count moods for days 10-16 of January 2025 in order to have data when showing example
     fun countMoodsForLastWeek(): Map<Int, Int> {
         val entries = _allEntries.value
-        return entries.filter { entry ->
-            // Check if the entry date is between January 10 and January 16, 2025
-            val date = LocalDate.parse(entry.date) // Assuming date is in "yyyy-MM-dd" format
-            date.year == 2025 && date.monthValue == 1 && date.dayOfMonth in 10..16
-        }.groupingBy { it.mood }.eachCount() // Count occurrences of each mood
+        val moodCount = mutableMapOf<Int, Int>()
+
+        // Define the date range
+        val startDate = LocalDate.of(2025, 1, 10)
+        val endDate = LocalDate.of(2025, 1, 16)
+
+        entries.forEach { entry ->
+            try {
+                // Parse the date from the entry
+                val date = LocalDate.parse(entry.date) // Assuming date is in "yyyy-MM-dd" format
+
+                // Check if the date is within the specified range
+                if (date in startDate..endDate) {
+                    // Count the mood
+                    moodCount[entry.mood] = moodCount.getOrDefault(entry.mood, 0) + 1
+                }
+            } catch (e: Exception) {
+                // Handle parsing error if necessary
+                e.printStackTrace()
+            }
+        }
+        return moodCount
     }
 
     // Count occurrences of a specified mood for each month in 2024 in order to have data when showing example
     fun countMoodForEachMonth(mood: Int): Map<Int, Int> {
         val entries = _allEntries.value
-        return entries.filter { entry ->
-            // Check if the entry date is in the year 2024
-            val date = LocalDate.parse(entry.date)
-            date.year == 2024
-        }.filter { it.mood == mood } // Filter to keep only the specified mood
-            .groupingBy { LocalDate.parse(it.date).monthValue } // Group by month
-            .eachCount() // Count occurrences for each month
+        val moodCount = mutableMapOf<Int, Int>()
+
+        // Iterate through each entry
+        entries.forEach { entry ->
+            try {
+                // Parse the date from the entry
+                val date = LocalDate.parse(entry.date) // Assuming date is in "yyyy-MM-dd" format
+
+                // Check if the date is in the year 2024
+                if (date.year == 2024 && entry.mood == mood) {
+                    // Get the month value (1 for January, 2 for February, etc.)
+                    val month = date.monthValue
+
+                    // Count the occurrences for the specified mood
+                    moodCount[month] = moodCount.getOrDefault(month, 0) + 1
+                }
+            } catch (e: Exception) {
+                // Handle parsing error if necessary
+                e.printStackTrace()
+            }
+        }
+        return moodCount
     }
+
 
     // Count occurrences of a specified emotion for each month in 2024 in order to have data when showing example
     fun countEmotionForEachMonth(emotion: String): Map<Int, Int> {
         val entries = _allEntries.value
-        return entries.filter { entry ->
-            // Check if the entry date is in the year 2024
-            val date = LocalDate.parse(entry.date)
-            date.year == 2024 && entry.emotions == emotion // Filter by the specified emotion
-        }.groupingBy { LocalDate.parse(it.date).monthValue } // Group by month
-            .eachCount() // Count occurrences for each month
+        val emotionCount = mutableMapOf<Int, Int>()
+
+        // Iterate through each entry
+        entries.forEach { entry ->
+            try {
+                // Parse the date from the entry
+                val date = LocalDate.parse(entry.date) // Assuming date is in "yyyy-MM-dd" format
+
+                // Check if the date is in the year 2024
+                if (date.year == 2024) {
+                    // Check if the specified emotion is present in the emotions string
+                    if (entry.emotions.split(",").map { it.trim() }.contains(emotion)) {
+                        // Get the month value (1 for January, 2 for February, etc.)
+                        val month = date.monthValue
+
+                        // Count the occurrences for the specified emotion
+                        emotionCount[month] = emotionCount.getOrDefault(month, 0) + 1
+                    }
+                }
+            } catch (e: Exception) {
+                // Handle parsing error if necessary
+                e.printStackTrace()
+            }
+        }
+        return emotionCount
     }
-}
+
+} // ειναι πολύ πιθανό να λέιπουν ή να είναι παραπάνω {}
